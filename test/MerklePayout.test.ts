@@ -29,7 +29,7 @@ describe("MerklePayout", async function () {
   let payout: MerklePayout;
 
   let token: TestERC20;
-  
+
   beforeEach('deploy token', async () => {
     MerklePayout = await ethers.getContractFactory("MerklePayout");
 
@@ -47,7 +47,7 @@ describe("MerklePayout", async function () {
       expect(isAddress(token.address), 'Failed to deploy TestERC20').to.be.true;
 
       // Deploy MerklePayout
-     
+
       payout = await MerklePayout.deploy(token.address, RANDOM_BYTES32, funder.address, overrides)
 
       // Verify deploy
@@ -70,38 +70,35 @@ describe("MerklePayout", async function () {
 
       payout = await MerklePayout.deploy(token.address, RANDOM_BYTES32, funder.address, overrides);
       const claimArgs = { index: 0, claimee: claimee.address, amount: 10, merkleProof: [] };
-      
+
       await expect(payout.claim(claimArgs)).to.be.revertedWith(
         'MerklePayout: Invalid proof.'
       );
     });
 
-    it('two account balance tree', async() => {
+    describe('two account balance tree', () => {
 
       let tree: BalanceTree;
-      let [funder, claimee0, claimee1] = await ethers.getSigners();
+
+      let funder: SignerWithAddress;
+      let claimee0: SignerWithAddress;
+      let claimee1: SignerWithAddress;
 
 
       beforeEach('deploy', async () => {
-        console.log("NOT WORKING.");
-        expect(false).to.eq(true);
+
+        [funder, claimee0, claimee1] = await ethers.getSigners();
 
         tree = new BalanceTree([
           { account: claimee0.address, amount: BigNumber.from(100) },
           { account: claimee1.address, amount: BigNumber.from(101) },
         ])
-        
+
         payout = await MerklePayout.deploy(token.address, tree.getHexRoot(), funder.address, overrides);
         await token.setBalance(payout.address, 201);
-      })
+      });
 
       it('successful claim', async () => {
-
-        expect(false).to.eq(true);
-
-        expect(await token.balanceOf(payout.address)).to.eq(201);
-        expect(await token.balanceOf(claimee0.address)).to.eq(0);
-        expect(await token.balanceOf(claimee1.address)).to.eq(0);
 
         // first claimee claims
         const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
@@ -109,22 +106,201 @@ describe("MerklePayout", async function () {
 
         await expect(payout.claim(claimArgs0)).to.emit(payout, 'FundsClaimed').withArgs(0, claimee0.address, 100);
 
+        // second claimee claims
+        const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+        const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+        await expect(payout.claim(claimArgs1)).to.emit(payout, 'FundsClaimed').withArgs(1, claimee1.address, 101);
+      });
+
+      it('sucessfully transfers token', async() => {
+
+        expect(await token.balanceOf(payout.address)).to.eq(201);
+        expect(await token.balanceOf(claimee0.address)).to.eq(0);
+
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+        await payout.claim(claimArgs0);
         expect(await token.balanceOf(payout.address)).to.eq(101);
         expect(await token.balanceOf(claimee0.address)).to.eq(100);
-        expect(await token.balanceOf(claimee1.address)).to.eq(0);
+      });
+
+      it('must have enough tokens to transfer', async() => {
+
+        await token.setBalance(payout.address, 99)
+
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+        await expect(payout.claim(claimArgs0)).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+      });
+
+      it('hasClaimed is set', async() => {
+
+        expect(await payout.hasClaimed(0)).to.be.false;
+
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+        await payout.claim(claimArgs0);
+
+        expect(await payout.hasClaimed(0)).to.be.true;
+      });
+
+      it('cannot allow 2 claims', async() => {
+        // claimee claims
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+        await payout.claim(claimArgs0);
+
+        // claimee attemps to claim again
+        await expect(payout.claim(claimArgs0)).to.be.revertedWith('MerklePayout: Funds already claimed.');
+      });
+
+      it('claimee0 cannot claim second time after claimee1 has claimed', async() => {
+        // first claimee claims
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+        await payout.claim(claimArgs0);
 
         // second claimee claims
-        const merkleProof1 = tree.getProof(0, claimee1.address, BigNumber.from(101));
-        const claimArgs1 = { index: 0, claimee: claimee0.address, amount: 101, merkleProof: merkleProof1 };
+        const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+        const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+        await payout.claim(claimArgs1);
 
-        await expect(payout.claim(claimArgs1)).to.emit(payout, 'FundsClaimed').withArgs(0, claimee1.address, 101);
+        // first claimee attemps to claim again
+        await expect(payout.claim(claimArgs0)).to.be.revertedWith('MerklePayout: Funds already claimed.');
+      });
 
-        expect(await token.balanceOf(payout.address)).to.eq(0);
-        expect(await token.balanceOf(claimee0.address)).to.eq(100);
-        expect(await token.balanceOf(claimee1.address)).to.eq(101);
-      })
 
+      it('claimee1 cannot claim second time after claimee0 has claimed', async() => {
+
+        // second claimee claims
+        const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+        const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+        await payout.claim(claimArgs1);
+
+        // first claimee claims
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+        await payout.claim(claimArgs0);
+
+        // second claimee attemps to claim again
+        await expect(payout.claim(claimArgs1)).to.be.revertedWith('MerklePayout: Funds already claimed.');
+      });
+
+      it('cannot claim more than proof', async() => {
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 105, merkleProof: merkleProof0 };
+
+        await expect(payout.claim(claimArgs0)).to.be.revertedWith('MerklePayout: Invalid proof.');
+      });
+
+      it('cannot claim for address other than proof', async () => {
+        const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+        const claimArgs1 = { index: 0, claimee: claimee1.address, amount: 100, merkleProof: merkleProof0 };
+
+        await expect(payout.claim(claimArgs1)).to.be.revertedWith('MerklePayout: Invalid proof.');
+      });
     });
 
-  })
+  });
+
+  describe('#batchClaim', () => {
+    
+    let tree: BalanceTree;
+
+    let funder: SignerWithAddress;
+    let claimee0: SignerWithAddress;
+    let claimee1: SignerWithAddress;
+
+
+    beforeEach('deploy', async () => {
+
+      [funder, claimee0, claimee1] = await ethers.getSigners();
+
+      tree = new BalanceTree([
+        { account: claimee0.address, amount: BigNumber.from(100) },
+        { account: claimee1.address, amount: BigNumber.from(101) },
+      ])
+
+      payout = await MerklePayout.deploy(token.address, tree.getHexRoot(), funder.address, overrides);
+      await token.setBalance(payout.address, 201);
+    });
+
+
+    it('successful batch claim', async () => {
+
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      const batchClaim = await payout.batchClaim([claimArgs0, claimArgs1]);
+
+      await expect(batchClaim).to.emit(payout, 'FundsClaimed').withArgs(0, claimee0.address, 100);
+      await expect(batchClaim).to.emit(payout, 'FundsClaimed').withArgs(1, claimee1.address, 101);
+    });
+
+    it('sets #hasClaimed', async () => {
+      
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      expect(await payout.hasClaimed(0)).to.false;
+
+      await payout.batchClaim([claimArgs0]);
+
+      expect(await payout.hasClaimed(0)).to.true;
+    });
+
+    it('sucessfully transfers token', async () => {
+      
+      expect(await token.balanceOf(payout.address)).to.eq(201);
+      expect(await token.balanceOf(claimee0.address)).to.eq(0);
+      expect(await token.balanceOf(claimee1.address)).to.eq(0);
+
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      await payout.batchClaim([claimArgs0, claimArgs1]);
+
+      expect(await token.balanceOf(payout.address)).to.eq(0);
+      expect(await token.balanceOf(claimee0.address)).to.eq(100);
+      expect(await token.balanceOf(claimee1.address)).to.eq(101);
+    });
+
+
+    it('user cannot claim after batchClaim completed', async () => {
+      
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      await payout.batchClaim([claimArgs0, claimArgs1]);
+
+      await expect(payout.claim(claimArgs0)).to.be.revertedWith('MerklePayout: Funds already claimed.');
+    });
+
+    it('user can claim it not claimed via batchClaim', async () => {
+      
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      await payout.batchClaim([claimArgs0]);
+
+      await expect(payout.claim(claimArgs1)).to.emit(payout, 'FundsClaimed').withArgs(1, claimee1.address, 101);;
+    });
+
+
+  });
 });
