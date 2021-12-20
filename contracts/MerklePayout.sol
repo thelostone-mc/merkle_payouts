@@ -123,6 +123,8 @@ contract MerklePayout {
 
     uint256 _balance = _token.balanceOf(address(this));
 
+    token.safeTransfer(funder, _balance);
+
     emit ReclaimFunds(funder, _token, _balance);
   }
 

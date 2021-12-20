@@ -11,7 +11,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 
 const RANDOM_BYTES32 = utils.randomBytes(32);
-const randomAddress = () => ethers.Wallet.createRandom().address;
+const randomAddress = async () => ethers.Wallet.createRandom().address;
 
 type Claim = {
   index: number;
@@ -300,7 +300,92 @@ describe("MerklePayout", async function () {
 
       await expect(payout.claim(claimArgs1)).to.emit(payout, 'FundsClaimed').withArgs(1, claimee1.address, 101);;
     });
+  });
 
+  describe('#reclaimFunds', () => {
 
+    let tree: BalanceTree;
+
+    let funder: SignerWithAddress;
+    let claimee0: SignerWithAddress;
+    let claimee1: SignerWithAddress;
+
+    beforeEach('deploy', async () => {
+
+      [funder, claimee0, claimee1] = await ethers.getSigners();
+
+      tree = new BalanceTree([
+        { account: claimee0.address, amount: BigNumber.from(100) },
+        { account: claimee1.address, amount: BigNumber.from(101) },
+      ])
+
+      payout = await MerklePayout.deploy(token.address, tree.getHexRoot(), funder.address, overrides);
+      await token.setBalance(payout.address, 201);
+    });
+
+    it('reclaimFunds invoked by another addrees', async () => {
+
+      payout = await MerklePayout.deploy(token.address, tree.getHexRoot(), await randomAddress(), overrides);
+
+      await(expect(payout.reclaimFunds(token.address))).to.be.revertedWith('MerklePayout: caller is not the funder');
+    })
+
+    it('reclaimFunds invoked before any claims', async () => {
+
+      await token.setBalance(funder.address, 0);
+
+      expect(await token.balanceOf(payout.address)).to.eq(201);
+      expect(await token.balanceOf(funder.address)).to.eq(0);
+
+      await payout.reclaimFunds(token.address);
+
+      expect(await token.balanceOf(payout.address)).to.eq(0);
+      expect(await token.balanceOf(funder.address)).to.eq(201);
+
+    });
+
+    it('reclaimFunds emits ReclaimFunds event before any claim', async () => {
+      expect(await payout.reclaimFunds(token.address)).to.emit(payout, 'ReclaimFunds').withArgs(funder.address, token.address, 201);
+    });
+
+    it('reclaimFunds invoked after 1 claim', async () => {
+
+      await token.setBalance(funder.address, 0);
+
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      await payout.claim(claimArgs0);
+      
+      expect(await token.balanceOf(payout.address)).to.eq(101);
+
+      await payout.reclaimFunds(token.address);
+
+      expect(await token.balanceOf(payout.address)).to.eq(0);
+      expect(await token.balanceOf(claimee0.address)).to.eq(100);
+      expect(await token.balanceOf(funder.address)).to.eq(101);
+    });
+
+    it('reclaimFunds invoked after all claim', async () => {
+
+      await token.setBalance(funder.address, 0);
+
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      await payout.batchClaim([claimArgs0, claimArgs1]);
+      
+      expect(await token.balanceOf(payout.address)).to.eq(0);
+
+      await payout.reclaimFunds(token.address);
+
+      expect(await token.balanceOf(funder.address)).to.eq(0);
+      expect(await token.balanceOf(payout.address)).to.eq(0);
+      expect(await token.balanceOf(claimee0.address)).to.eq(100);
+      expect(await token.balanceOf(claimee1.address)).to.eq(101);
+
+    });
   });
 });
