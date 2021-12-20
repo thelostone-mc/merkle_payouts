@@ -26,10 +26,10 @@ contract MerklePayout {
   // --- Events ---
 
   /// @notice Emitted when funder reclaims funds
-  event ReclaimFunds(address funder, IERC20 token, uint256 amount);
+  event ReclaimFunds(address indexed funder, IERC20 indexed token, uint256 indexed amount);
 
   /// @notice Emitted when user succesfully claims funds
-  event FundsClaimed(uint256 index, address indexed claimee, uint256 amount);
+  event FundsClaimed(uint256 index, address indexed claimee, uint256 indexed amount);
 
 
   // --- Types ---
