@@ -5,6 +5,41 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
+
+/**
+ * @notice The `MerklePayout` contract enables claimes to claim their token
+ * after funds have been loaded into this contract. They claim their
+ * funds in the given `ERC20` token by providing a merkleProof.
+ *
+ * This contract is intended to work as follows:
+ *  - Generate a Merkle tree on how the match payout results
+ *  - Deploy an instance of this contract with the associated Merkle root
+ *  - Transfer match funds from the funder to the contract
+ *  - Users eligible for match payouts can use the `claim`
+ *  - Anyone can invoke `batchClaim` method to process all the claims
+ *
+ * @dev code sourced from https://github.com/Uniswap/merkle-distributor/blob/0d478d722da2e5d95b7292fd8cbdb363d98e9a93/contracts/MerkleDistributor.sol
+ * Changes made:
+ *
+ * General
+ *  - does not implement interface `IMerkleDistributor`
+ *
+ *
+ * Variable
+ *  - add `funder` param who funds and reclaim funds from contract
+ *  - `account` renamed to `claimee`
+ *
+ * Events
+ * - add `ReclaimFunds` which is emitted on invoking `reclaimFunds`
+ * -
+ *
+ * Functions
+ *  - `isClaimed` renamed to `hasClaimed`
+ *  - add `reclaimFunds` to claw back remaining funds
+ *  - claim function accepts argument `Claim`
+ *  - claim function is public to enable `batchClaims`
+ *  - add `batchClaim` function to allow multiple claims in a single transaction
+ */
 contract MerklePayout {
   using SafeERC20 for IERC20;
 
@@ -42,8 +77,8 @@ contract MerklePayout {
   }
 
   // --- Constructor ---
-  
-  /// @notice sets the funder address, payout token, merkleRoot 
+
+  /// @notice sets the funder address, payout token, merkleRoot
   constructor(
     IERC20 _token,
     bytes32 _merkleRoot,
@@ -136,7 +171,7 @@ contract MerklePayout {
    */
   function batchClaim(Claim[] calldata _claims) external {
     require(msg.sender == funder, "MerklePayout: caller is not the funder");
-  
+
     for (uint256 i = 0; i < _claims.length; i++) {
       claim(_claims[i]);
     }
