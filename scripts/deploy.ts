@@ -3,23 +3,78 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+import { isHexString } from "ethereumjs-util";
 import { ethers } from "hardhat";
+import readline from 'readline';
+
+// TODO: update config.data before deploy
+import { config, distributions } from "./input";
+
+import { MerkleDistributorInfo } from '../utils/parse-balance-map';
+import { generateMerkle } from '../utils/merkle';
+
+function getClaimsInfo(merkle: any) {
+  const claims = Object.keys(merkle.claims).map((key) => {
+    return {
+      index: merkle.claims[key].index,
+      payee: key,
+      amount: merkle.claims[key].amount,
+      merkleProof: merkle.claims[key].proof,
+    };
+  });
+  const claimsAmount = claims.reduce((acc, claim) => acc.add(claim.amount), ethers.BigNumber.from(0));
+
+  return { 'amount': claimsAmount, 'count': claims.length };
+}
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  
+  // Wait 10 blocks for re-org protection
+  const blocksToWait = 10;
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  if (!config.tokenAddress) {
+    throw new Error('tokenAddress is not set in env!');
+  } else if (!config.funderAddress) {
+    throw new Error('funderAddress is not set in env!');
+  }
 
-  await greeter.deployed();
+  // Verify we have a valid merkle root
+  const merkle: MerkleDistributorInfo = generateMerkle(distributions, config.tokenDecimal);
+  const merkleRoot = merkle.merkleRoot;
+  if (!merkleRoot || merkleRoot.length !== 66 || !isHexString(merkleRoot)) {
+    throw new Error('Merkle root could not be found');
+  }
+  
 
-  console.log("Greeter deployed to:", greeter.address);
+  // --- Prompt user to verify data before continuing ---
+  const claimsInfo = await getClaimsInfo(merkle.claims);
+  await confirmContinue({
+    'network              ': config.network,
+    'tokenAddress         ': config.tokenAddress,
+    'tokenDecimal         ': config.tokenDecimal,
+    'funderAddress        ': config.funderAddress,
+    'merkle root          ': merkleRoot,
+    'total claims amount  ': claimsInfo.amount,
+    'number of claims     ': claimsInfo.count
+  });
+
+
+  // --- Deploy the Merkle Distributor ---
+  const merkleFactory = await ethers.getContractFactory("MerklePayout");
+  const merklePayout = await merkleFactory.deploy(
+    config.tokenAddress,
+    merkleRoot,
+    config.funderAddress
+  );
+
+  console.log(`Deploying Merkle Distributor to ${merklePayout.address}....`);
+  await merklePayout.deployTransaction.wait(blocksToWait);;
+  console.log('✅ Deployed');
+
+  console.log('================== CLAIMS ==================')
+  console.log(merkle.claims);
+  console.log('================== END ==================')
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -28,3 +83,26 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+
+
+// --- User verification ---
+// Helper method for waiting on user input. Source: https://stackoverflow.com/a/50890409
+async function waitForInput(query: string): Promise<unknown> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
+async function confirmContinue(params: Record<string, unknown>) {
+  console.log('\nPARAMETERS');
+  console.table(params);
+
+  const response = await waitForInput('\nDo you want to continue? y/N\n');
+  if (response !== 'y') throw new Error('Aborting script: User chose to exit script');
+  console.log('\n');
+}

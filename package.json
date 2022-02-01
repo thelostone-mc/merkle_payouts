@@ -19,7 +19,12 @@
     "lint:ts-fix": "npx eslint '**/*.{js,ts}' --fix",
 
     "prettier": "npx prettier '**/*.{json,sol,md}' --check",
-    "prettier:fix": "npx prettier '**/*.{json,sol,md}' --write"
+    "prettier:fix": "npx prettier '**/*.{json,sol,md}' --write",
+
+    "typechain": "hardhat typechain",
+
+    "deploy:rinkeby": "yarn hardhat run scripts/deploy.ts --network rinkeby",
+    "deploy:mainnet": "yarn hardhat run scripts/deploy.ts --network mainnet"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
