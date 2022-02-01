@@ -22,7 +22,7 @@ export const generateMerkle = (distributions: PayoutDistribution[], payoutTokenD
   distributions.forEach((distribution: PayoutDistribution) => {
     merkleInput.push({
       address: distribution.address,
-      earnings: parseUnits(distribution.match.toString(), payoutTokenDecimal).toHexString(),
+      earnings: parseUnits(distribution.amount.toString(), payoutTokenDecimal).toHexString(),
       reasons: '',
     });
   });

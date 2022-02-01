@@ -1,6 +1,6 @@
 export type PayoutDistribution = {
   address: string;
-  match: number;
+  amount: number;
 };
 
 export type PayoutConfig = {
