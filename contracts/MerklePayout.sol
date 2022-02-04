@@ -130,7 +130,7 @@ contract MerklePayout {
     uint256 _amount = _claim.amount;
     bytes32[] calldata _merkleProof = _claim.merkleProof;
 
-    // check if payee has not claimed funds
+    // check if claimee has not claimed funds
     require(!hasClaimed(_index), "MerklePayout: Funds already claimed.");
 
     // verify the merkle proof

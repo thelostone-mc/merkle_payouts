@@ -13,18 +13,18 @@ import { config, distributions } from "./input";
 import { MerkleDistributorInfo } from '../utils/parse-balance-map';
 import { generateMerkle } from '../utils/merkle';
 
-function getClaimsInfo(merkle: any) {
-  const claims = Object.keys(merkle.claims).map((key) => {
+function getClaimsInfo(_claims: any) {
+  const claims = Object.keys(_claims).map((key) => {
     return {
-      index: merkle.claims[key].index,
-      payee: key,
-      amount: merkle.claims[key].amount,
-      merkleProof: merkle.claims[key].proof,
+      index: _claims[key].index,
+      claimee: key,
+      amount: _claims[key].amount,
+      merkleProof: _claims[key].proof,
     };
   });
   const claimsAmount = claims.reduce((acc, claim) => acc.add(claim.amount), ethers.BigNumber.from(0));
 
-  return { 'amount': claimsAmount, 'count': claims.length };
+  return { 'claims': claims ,'amount': claimsAmount };
 }
 
 async function main() {
@@ -44,7 +44,6 @@ async function main() {
   if (!merkleRoot || merkleRoot.length !== 66 || !isHexString(merkleRoot)) {
     throw new Error('Merkle root could not be found');
   }
-  
 
   // --- Prompt user to verify data before continuing ---
   const claimsInfo = await getClaimsInfo(merkle.claims);
@@ -55,7 +54,7 @@ async function main() {
     'funderAddress        ': config.funderAddress,
     'merkle root          ': merkleRoot,
     'total claims amount  ': claimsInfo.amount,
-    'number of claims     ': claimsInfo.count
+    'number of claims     ': claimsInfo.claims.length
   });
 
 
@@ -71,8 +70,9 @@ async function main() {
   await merklePayout.deployTransaction.wait(blocksToWait);;
   console.log('✅ Deployed');
 
-  console.log('================== CLAIMS ==================')
-  console.log(merkle.claims);
+  console.log('================== CLAIMS: THIS SHOULD BE SAVED ==================')
+  console.log(claimsInfo.claims);
+  // TODO: Write output to a file
   console.log('================== END ==================')
 
 }
