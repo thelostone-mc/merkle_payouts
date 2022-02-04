@@ -28,7 +28,7 @@ function getClaimsInfo(_claims: any) {
 }
 
 async function main() {
-  
+
   // Wait 10 blocks for re-org protection
   const blocksToWait = 10;
 
@@ -70,10 +70,10 @@ async function main() {
   await merklePayout.deployTransaction.wait(blocksToWait);;
   console.log('✅ Deployed');
 
-  console.log('================== CLAIMS: THIS SHOULD BE SAVED ==================')
+  console.log('////////////////// CLAIMS: THIS SHOULD BE SAVED //////////////////')
   console.log(claimsInfo.claims);
   // TODO: Write output to a file
-  console.log('================== END ==================')
+  console.log('////////////////// END //////////////////')
 
 }
 
