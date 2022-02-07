@@ -1,10 +1,11 @@
 import { PayoutConfig, PayoutDistribution } from "../types";
 
+// TODO: UPDATE
 export const config: PayoutConfig = {
-  network: 'rinkeby', // TODO: UPDATE
-  tokenAddress: '0xC48ea75748bE6335476C6EdF6DDc7782F2ddaAE8', // TODO: UPDATE
-  tokenDecimal: 18, // TODO: UOPDATE
-  funderAddress: '0x5cdb35fADB8262A3f88863254c870c2e6A848CcA',// TODO: UPDATE
+  network: 'rinkeby',
+  tokenAddress: '0xC48ea75748bE6335476C6EdF6DDc7782F2ddaAE8',
+  tokenDecimal: 18,
+  funderAddress: '0x5cdb35fADB8262A3f88863254c870c2e6A848CcA'
 };
 
 // TODO : UPDATE

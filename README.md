@@ -1,46 +1,82 @@
-# Advanced Sample Hardhat Project
+# Merkle Payout
 
-This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
+This is an implementation of Uniswap's merkle payout contract and is built using hardhat.
+The original implementation can be found [here](https://github.com/Uniswap/merkle-distributor/blob/0d478d722da2e5d95b7292fd8cbdb363d98e9a93/contracts/MerkleDistributor.sol)
 
-The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
+This is a sample contract which has been deployed on [rinkeby](https://rinkeby.etherscan.io/address/0x767824cd7f9308a88e55ed63560ecc13700ea062)
 
-Try running some of the following tasks:
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
+## Features offered
+
+This merkle contract supports
+
+- deploying on `mainnet`/`rinkeby`
+- on deploy
+    - funder
+    - token
+    - merkleRoot
+
+
+### Read functions
+
+- `funder`          : the address who deposts and can reclaim funds
+- `token`           : ERC20 token in which the payouts should happen
+- `merkleRoot`      : generated merkle root of the distribution
+- `hasClaimed`      : check if an address has a pending claim
+
+### Write functions
+
+- `claim`           : allows address to make a claim against the contract
+- `batchClaim`      : allows address to to trigger all pending claims
+- `reclaimFunds`    : invoked by `funder` and allowed `token` to be sent back to `funder`
+
+
+### Events Emitted
+
+- `ReclaimFunds`    : emitted when `funder` invokes `reclaimFunds`
+- `FundsClaimed`    : emitted when `address` succesfully invokes `claim`
+
+
+## Deploy
+
+- Create an `.env` file and fill out
+    - `INFURA_ID`               : Infura ID for deploying contract
+    - `DEPLOYER_PRIVATE_KEY`    : address which deploys the contract
+    - `ETHERSCAN_API_KEY`       : API key for etherscan verification
+
+
+- Update `input.ts` parameters
+    - `PayoutConfig`
+    - `PayoutDistribution[]`
+- Update `verify.ts` parameter
+    - `token`
+    - `merkleRoot`
+    - `funder`
+
+- Deploy contract
+    - `yarn deploy:rinkeby` - Deploy on rinkeby
+    - `yarn deploy:mainnet` - Deploy on mainnet
+
+- Verify contract on etherscan
+    - rinkeby: `yarn hardhat verify --constructor-args verify.js --network rinkeby <CONTRACT_ADDRESS>`
+    - mainnet: `yarn hardhat verify --constructor-args verify.js --network mainnet <CONTRACT_ADDRESS>`
+
+- The claims object would be generated and stored in `scripts/output.json` (Save this as this would be required for an address to make a claim)
+
+_Note: To make a claim against via etherscan, the claim object would be of the following format_
+```js
+[2,'0x5cdb35fADB8262A3f88863254c870c2e6A848CcA','0x4563918244f40000',['0x025ddd38f5815f027203629fc384e2a7beb453a112c2de03feb75dca73aef3bf','0xc1d74d73190dcdd156b817d78d3459ecd5efac2345c34fa48ad52d2ae11dc526','0x2bb06b1200f1a5d9c3d252ec853852c5042118c7fa74781e510ed334add6a1f2','0x2107e84fe9e2588768a806612070bc0c2095c08e70af311cad5ae5c2c0fa27a4']]
 ```
+### Contract Changes
 
-# Etherscan verification
+Any time you make changes to the contract/ deploy scripts. Ensure these steps are run before raising a PR to make changes
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
+- After making changes to the `contract/`
+    - `hardhat clean`   : to clean artifacts
+    - `hardhat compile` : compile contract
 
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+- Run lint + prettier
+    - `yarn lint`
+    - `yarn prettier`
 
-```shell
-hardhat run --network ropsten scripts/sample-script.ts
-```
-
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
-
-```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
-```
-
-# Performance optimizations
-
-For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+- Run tests using `yarn test`

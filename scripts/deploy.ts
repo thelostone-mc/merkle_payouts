@@ -6,8 +6,8 @@
 import { isHexString } from "ethereumjs-util";
 import { ethers } from "hardhat";
 import readline from 'readline';
+import * as fs from 'fs';
 
-// TODO: update config.data before deploy
 import { config, distributions } from "./input";
 
 import { MerkleDistributorInfo } from '../utils/parse-balance-map';
@@ -70,7 +70,10 @@ async function main() {
   await merklePayout.deployTransaction.wait(blocksToWait);;
   console.log('✅ Deployed');
 
-  console.log('////////////////// CLAIMS: THIS SHOULD BE SAVED //////////////////')
+  console.log('////////////////// CLAIMS: THIS IS WRITTEN TO output.json //////////////////')
+  
+  fs.writeFileSync('./scripts/output.json', JSON.stringify(claimsInfo.claims, null, 2));
+
   console.log(claimsInfo.claims);
   // TODO: Write output to a file
   console.log('////////////////// END //////////////////')
