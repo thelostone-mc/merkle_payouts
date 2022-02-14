@@ -274,6 +274,15 @@ describe("MerklePayout", async function () {
       expect(await token.balanceOf(claimee1.address)).to.eq(101);
     });
 
+    it('user who is not funder cannot call batch claim', async () => {
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      await(expect(payout.connect(claimee0).batchClaim([claimArgs0, claimArgs1]))).to.be.revertedWith('MerklePayout: caller is not the funder');
+    });
 
     it('user cannot claim after batchClaim completed', async () => {
       

@@ -87,4 +87,17 @@ yarn lint       # eslint
 yarn prettier   # prettier
 
 yarn test       # test
+
+yarn coverage   # coverage report
+```
+
+### Coverage Report
+
+Coverage report is built using [solidity-coverage](https://github.com/sc-forks/solidity-coverage/blob/master/HARDHAT_README.md) plugin.
+
+```shell
+alias chrome="open -a 'Google Chrome'"
+
+yarn coverage
+chrome coverage/index.html
 ```
