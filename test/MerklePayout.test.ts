@@ -243,6 +243,20 @@ describe("MerklePayout", async function () {
       await expect(batchClaim).to.emit(payout, 'FundsClaimed').withArgs(1, claimee1.address, 101);
     });
 
+    it('BatchClaimTriggered fired on successful batch claim', async () => {
+
+      const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
+      const claimArgs0 = { index: 0, claimee: claimee0.address, amount: 100, merkleProof: merkleProof0 };
+
+      const merkleProof1 = tree.getProof(1, claimee1.address, BigNumber.from(101));
+      const claimArgs1 = { index: 1, claimee: claimee1.address, amount: 101, merkleProof: merkleProof1 };
+
+      const batchClaim = await payout.batchClaim([claimArgs0, claimArgs1]);
+
+      await expect(batchClaim).to.emit(payout, 'BatchClaimTriggered').withArgs(funder.address);
+    });
+
+
     it('sets #hasClaimed', async () => {
       
       const merkleProof0 = tree.getProof(0, claimee0.address, BigNumber.from(100));
