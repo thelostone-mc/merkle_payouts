@@ -66,6 +66,8 @@ contract MerklePayout {
   /// @notice Emitted when user succesfully claims funds
   event FundsClaimed(uint256 index, address indexed claimee, uint256 indexed amount);
 
+  /// @notice Emitted when funder succesfully invokes batchClaim
+  event BatchClaimTriggered(address indexed funder);
 
   // --- Types ---
 
@@ -175,5 +177,7 @@ contract MerklePayout {
     for (uint256 i = 0; i < _claims.length; i++) {
       claim(_claims[i]);
     }
+
+    emit BatchClaimTriggered(funder);
   }
 }

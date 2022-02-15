@@ -12,9 +12,9 @@ This merkle contract supports
 
 - deploying on `mainnet`/`rinkeby`
 - on deploy
-    - funder
-    - token
-    - merkleRoot
+    - `funder`
+    - `token`
+    - `merkleRoot`
 
 
 #### Read functions
@@ -27,14 +27,15 @@ This merkle contract supports
 #### Write functions
 
 - `claim`           : allows address to make a claim against the contract
-- `batchClaim`      : allows address to to trigger all pending claims
+- `batchClaim`      : invoked by `funder` to trigger all pending claims
 - `reclaimFunds`    : invoked by `funder` and allowed `token` to be sent back to `funder`
 
 
 #### Events Emitted
 
-- `ReclaimFunds`    : emitted when `funder` invokes `reclaimFunds`
-- `FundsClaimed`    : emitted when `address` succesfully invokes `claim`
+- `ReclaimFunds`        : emitted when `funder` invokes `reclaimFunds`
+- `FundsClaimed`        : emitted when `address` succesfully invokes `claim`
+- `BatchClaimTriggered` : emitted when `funder` succesfully invokes `batchClaim`
 
 
 ### Deploying merkle contract
