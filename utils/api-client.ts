@@ -21,7 +21,7 @@ export default class APIClient {
   public readonly token;
 
   public paths = {
-    injestMerkleClaims: "/grants/v1/api/ingest_merkle_claim_to_clr_match"
+    ingestMerkleClaims: "/grants/v1/api/ingest_merkle_claim_to_clr_match"
   }
 
   constructor(httpClient: HTTPClient, baseURL: string, token: string) {
@@ -30,8 +30,8 @@ export default class APIClient {
     this.token = token;
   }
 
-  public async injestMerkleClaims(claims: Object) {
-    return this.post(this.paths.injestMerkleClaims, claims);
+  public async ingestMerkleClaims(claims: Object) {
+    return this.post(this.paths.ingestMerkleClaims, claims);
   }
 
   private async post(path: string, data?: Object, configOverride?: any): Promise<APIResponse> {

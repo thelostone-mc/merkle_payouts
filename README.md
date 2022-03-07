@@ -44,6 +44,9 @@ This merkle contract supports
     - `INFURA_ID`               : Infura ID for deploying contract
     - `DEPLOYER_PRIVATE_KEY`    : address which deploys the contract
     - `ETHERSCAN_API_KEY`       : API key for etherscan verification
+    - `TOKEN`                   : Access token for the `ingest_merkle_claim_to_clr_match` API
+    - `GRANT_PAYOUT_PK`         : Grant payout primary key
+    - `API_BASE_URL`            : Base backend API URL (`http://localhost:8000` or `https://gitcoin.co`)
 
 
 - Update `input.ts` parameters
@@ -57,7 +60,7 @@ This merkle contract supports
 - Deploy contract
     ```shell
     yarn deploy:rinkeby #  deploy on rinkeby
-    yarn deploy:mainnet #  deploy on mainnet   
+    yarn deploy:mainnet #  deploy on mainnet
     ```
 
 
@@ -74,6 +77,11 @@ This merkle contract supports
     Note: To make a claim against via etherscan, the claim object would be of the following format
     ```js
     [2,'0x5cdb35fADB8262A3f88863254c870c2e6A848CcA','0x4563918244f40000',['0x025ddd38f5815f027203629fc384e2a7beb453a112c2de03feb75dca73aef3bf','0xc1d74d73190dcdd156b817d78d3459ecd5efac2345c34fa48ad52d2ae11dc526','0x2bb06b1200f1a5d9c3d252ec853852c5042118c7fa74781e510ed334add6a1f2','0x2107e84fe9e2588768a806612070bc0c2095c08e70af311cad5ae5c2c0fa27a4']]
+    ```
+
+- Ingest merkle claims in the backend:
+    ```shell
+    yarn ingest_merkle_claims
     ```
 
 ### Contract Changes

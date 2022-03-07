@@ -17,7 +17,8 @@
     "prettier:fix": "npx prettier '**/*.{json,sol,md}' --write",
     "typechain": "hardhat typechain",
     "deploy:rinkeby": "yarn hardhat run scripts/deploy.ts --network rinkeby",
-    "deploy:mainnet": "yarn hardhat run scripts/deploy.ts --network mainnet"
+    "deploy:mainnet": "yarn hardhat run scripts/deploy.ts --network mainnet",
+    "ingest_merkle_claims": "yarn hardhat run scripts/ingest-merkle-claims.ts"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",

@@ -20,7 +20,7 @@ async function main() {
   });
 
   const c = new APIClient(axios, apiBaseURL!, apiToken!);
-  const resp = await c.injestMerkleClaims({
+  const resp = await c.ingestMerkleClaims({
     grant_payout_pk: grantPayoutPk,
     claims,
   });
