@@ -54,6 +54,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.0",
     "@types/ethereumjs-util": "^6.1.0",
+    "axios": "^0.26.0",
     "ethereumjs-util": "^7.1.0"
   }
 }
