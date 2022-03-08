@@ -1,13 +1,13 @@
 import { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
 type APIResponseOK = {
-  body: any
+  body: any;
 };
 
 type APIResponseError = {
-  status: number
-  error: string
-}
+  status: number;
+  error: string;
+};
 
 type APIResponse = APIResponseError | APIResponseOK;
 
@@ -21,8 +21,8 @@ export default class APIClient {
   public readonly token;
 
   public paths = {
-    ingestMerkleClaims: "/grants/v1/api/ingest_merkle_claim_to_clr_match"
-  }
+    ingestMerkleClaims: "/grants/v1/api/ingest_merkle_claim_to_clr_match",
+  };
 
   constructor(httpClient: HTTPClient, baseURL: string, token: string) {
     this.httpClient = httpClient;
@@ -34,7 +34,11 @@ export default class APIClient {
     return this.post(this.paths.ingestMerkleClaims, claims);
   }
 
-  private async post(path: string, data?: Object, configOverride?: any): Promise<APIResponse> {
+  private async post(
+    path: string,
+    data?: Object,
+    configOverride?: any
+  ): Promise<APIResponse> {
     return this.request("post", path, data, configOverride);
   }
 
@@ -42,7 +46,12 @@ export default class APIClient {
     return new URL(path, this.baseURL);
   }
 
-  private async request(method: Method, path: string, data?: Object, configOverride?: any): Promise<APIResponse> {
+  private async request(
+    method: Method,
+    path: string,
+    data?: Object,
+    configOverride?: any
+  ): Promise<APIResponse> {
     const config = {
       url: this.buildURL(path).toString(),
       method,
@@ -58,18 +67,18 @@ export default class APIClient {
       if (resp.status >= 200 && resp.status <= 299) {
         return {
           body: resp.data,
-        }
+        };
       } else {
         return {
           status: resp.status,
-          error: resp.data
-        }
+          error: resp.data,
+        };
       }
     } catch (err: any) {
-        return {
-          status: -1,
-          error: err
-        }
+      return {
+        status: -1,
+        error: err,
+      };
     }
   }
 }

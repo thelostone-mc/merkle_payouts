@@ -1,13 +1,13 @@
 import * as dotenv from "dotenv";
 
 import { HardhatUserConfig, task } from "hardhat/config";
-import { NetworkUserConfig } from 'hardhat/types';
+import { NetworkUserConfig } from "hardhat/types";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-require('solidity-coverage');
+require("solidity-coverage");
 
 dotenv.config();
 
@@ -27,29 +27,28 @@ const chainIds = {
   rinkeby: 4,
 };
 
-
-let mnemonic = process.env.MNEMONIC as string;
+const mnemonic = process.env.MNEMONIC as string;
 if (!mnemonic) {
-  console.warn('Please set your MNEMONIC in a .env file');
+  console.warn("Please set your MNEMONIC in a .env file");
 }
-
 
 const infuraIdKey = process.env.INFURA_ID as string;
 if (!infuraIdKey) {
-  console.warn('Please set your INFURA_ID in a .env file');
+  console.warn("Please set your INFURA_ID in a .env file");
 }
-
 
 // Configure dummy private key, so CI doesn't fail due a lack of private key env var, which is only needed for
 // contract deployment anyway (i.e. not required for CI)
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
 if (!deployPrivateKey) {
-  console.warn('Please set your DEPLOYER_PRIVATE_KEY in a .env file');
-  deployPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000001';
+  console.warn("Please set your DEPLOYER_PRIVATE_KEY in a .env file");
+  deployPrivateKey =
+    "0x0000000000000000000000000000000000000000000000000000000000000001";
 }
 
-function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig {
-
+function createTestnetConfig(
+  network: keyof typeof chainIds
+): NetworkUserConfig {
   const url: string = `https://${network}.infura.io/v3/${infuraIdKey}`;
   return {
     accounts: [deployPrivateKey],
@@ -65,7 +64,7 @@ function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig 
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
-    rinkeby: createTestnetConfig('rinkeby'),
+    rinkeby: createTestnetConfig("rinkeby"),
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
