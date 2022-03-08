@@ -1,6 +1,6 @@
 // code sourced from: https://github.com/Uniswap/merkle-distributor/blob/b986f50809b14dda0dd5b2390ba3791df2218313/src/balance-tree.ts
-import MerkleTree from './merkle-tree';
-import { BigNumber, utils } from 'ethers';
+import MerkleTree from "./merkle-tree";
+import { BigNumber, utils } from "ethers";
 
 export class BalanceTree {
   private readonly tree: MerkleTree;
@@ -28,10 +28,19 @@ export class BalanceTree {
   }
 
   // keccak256(abi.encode(index, account, amount))
-  public static toNode(index: number | BigNumber, account: string, amount: BigNumber): Buffer {
+  public static toNode(
+    index: number | BigNumber,
+    account: string,
+    amount: BigNumber
+  ): Buffer {
     return Buffer.from(
-      utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount]).substr(2),
-      'hex'
+      utils
+        .solidityKeccak256(
+          ["uint256", "address", "uint256"],
+          [index, account, amount]
+        )
+        .substr(2),
+      "hex"
     );
   }
 
@@ -40,7 +49,11 @@ export class BalanceTree {
   }
 
   // returns the hex bytes32 values of the proof
-  public getProof(index: number | BigNumber, account: string, amount: BigNumber): string[] {
+  public getProof(
+    index: number | BigNumber,
+    account: string,
+    amount: BigNumber
+  ): string[] {
     return this.tree.getHexProof(BalanceTree.toNode(index, account, amount));
   }
 }

@@ -8,4 +8,4 @@ export type PayoutConfig = {
   tokenAddress: string;
   tokenDecimal: number;
   funderAddress: string;
-}
+};
