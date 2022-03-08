@@ -3,7 +3,7 @@
 This is an implementation of Uniswap's merkle payout contract and is built using hardhat.
 The original implementation can be found [here](https://github.com/Uniswap/merkle-distributor/blob/0d478d722da2e5d95b7292fd8cbdb363d98e9a93/contracts/MerkleDistributor.sol)
 
-This is a sample contract which has been deployed on [rinkeby](https://rinkeby.etherscan.io/address/0x767824cd7f9308a88e55ed63560ecc13700ea062)
+This is a sample contract which has been deployed on [rinkeby](https://rinkeby.etherscan.io/address/0x2aFFFe0B3BA1D3FD4a1Fc0a06AD0cAe4D22ABa4C)
 
 
 ### Features offered
