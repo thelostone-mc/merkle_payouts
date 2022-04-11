@@ -110,3 +110,8 @@ alias chrome="open -a 'Google Chrome'"
 yarn coverage
 chrome coverage/index.html
 ```
+### Deploys
+
+| Round | Token | Contract Address                                                        |
+|-------|-------|-------------------------------------------------------------------------|
+| GR13  | DAI   | https://etherscan.io/address/0xF63FD0739cB68651eFbD06BCcb23F1A1623D5520 |

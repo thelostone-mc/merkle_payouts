@@ -64,12 +64,12 @@ function createTestnetConfig(
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
-    rinkeby: createTestnetConfig("rinkeby"),
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    mainnet: {
+      url: `https://mainnet.infura.io/v3/${infuraIdKey}`,
+      chainId: chainIds['mainnet'],
+      accounts: [deployPrivateKey]
     },
+    rinkeby: createTestnetConfig("rinkeby")
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
