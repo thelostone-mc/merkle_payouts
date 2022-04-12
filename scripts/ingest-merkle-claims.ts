@@ -5,7 +5,7 @@ import path from "path";
 import { confirmContinue } from "../utils/scripts-utils";
 
 async function main() {
-  const apiBaseURL = process.env.API_BASE_URL;
+  const apiBaseURL = process.env.API_BASE_URL + '/grants/v1/api/ingest_merkle_claim_to_clr_match';
   const apiToken = process.env.TOKEN;
   const grantPayoutPk = process.env.GRANT_PAYOUT_PK;
 
