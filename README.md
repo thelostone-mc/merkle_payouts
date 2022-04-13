@@ -116,3 +116,4 @@ chrome coverage/index.html
 |-------|-------|-------------------------------------------------------------------------|
 | GR13  | DAI   | https://etherscan.io/address/0xF63FD0739cB68651eFbD06BCcb23F1A1623D5520 |
 | GR13  | UNI   | https://etherscan.io/address/0x0019863771b57FBA997cF6602CB2dD572A43e977 |
+| GR13  | gOHM  | https://etherscan.io/address/0x868CBca73915f842A70cD9584D80a57DB5E690C1 |
