@@ -20,13 +20,17 @@ export const generateMerkle = (
 ) => {
   // initialize
   const merkleInput: NewFormat[] = [];
-
+  
   // foreach payout parse the earnings
   distributions.forEach((distribution: PayoutDistribution) => {
+    const amount = roundCryptoValueString(distribution.amount.toString(), payoutTokenDecimal);
+    console.log("address:", distribution.address);
+    console.log("amount:", amount);
+    
     merkleInput.push({
       address: distribution.address,
       earnings: parseUnits(
-        distribution.amount.toString(),
+        amount,
         payoutTokenDecimal
       ).toHexString(),
       reasons: "",
@@ -118,3 +122,13 @@ export const getMerkleProof = (
     return [];
   }
 };
+
+function roundCryptoValueString(numberStr: string, decimalPlaces=18){
+  const arr = numberStr.split(".");
+  if (arr[1]) {
+    const fraction = arr[1] .substr(0, decimalPlaces);
+    return arr[0] + "." + fraction;
+  } else {
+    return arr[0];
+  }
+}
