@@ -119,7 +119,6 @@ chrome coverage/index.html
 | GR13  | gOHM  | https://etherscan.io/address/0x868CBca73915f842A70cD9584D80a57DB5E690C1 |
 | GR14  | DAI   | https://etherscan.io/address/0x2878883dD4345C7b35c13FefC5096dd400814D91 |
 | GR14  | UDT   | https://etherscan.io/address/0x22fDA1F97F2fD078F4609AaF74914ddf436de8e8 |
-| GR14  | MASK  | https://etherscan.io/address/ |
+| GR14  | MASK  | https://etherscan.io/address/0x62a5A2E85619c0922B32243165B9BAAB27Bc7E63 |
 | GR14  | AURORA| https://etherscan.io/address/ |
-| GR14  | MASK  | https://etherscan.io/address/ |
 | GR14  | GRT   | https://etherscan.io/address/ |
