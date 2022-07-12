@@ -121,4 +121,4 @@ chrome coverage/index.html
 | GR14  | UDT   | https://etherscan.io/address/0x22fDA1F97F2fD078F4609AaF74914ddf436de8e8 |
 | GR14  | MASK  | https://etherscan.io/address/0x62a5A2E85619c0922B32243165B9BAAB27Bc7E63 |
 | GR14  | AURORA| https://etherscan.io/address/ |
-| GR14  | GRT   | https://etherscan.io/address/ |
+| GR14  | GRT   | https://etherscan.io/address/0xa640830aFAa6455E198eDa49E085C4C377789ddd |
